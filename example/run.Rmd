@@ -57,7 +57,7 @@ As in the previous scenario, we applied the IND, EX, and AR1 models to each scen
 
 The data can be generated using the `dat_with_cure()` function found in `codes.R` within the `code` folder. 
 You can load the `codes.R` file and view the arguments of `dat_with_cure()` using the following code:
-```{R}
+```{R, message=FALSE, warning=FALSE}
 source("../code/codes.R")
 args(dat_with_cure)
 ```
