@@ -1,0 +1,135 @@
+---
+title: "A weighted generalized estimating equation approach to mixture cure survival with informative cluster size"
+data: September 21, 2024
+output:
+  rmarkdown::html_document:
+    toc: true
+    toc_depth: 3
+    toc_float: true
+---
+
+```{r default, include = FALSE, collapse = TRUE}
+library(knitr)
+opts_chunk$set(prompt = TRUE, comment = "")
+```
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+
+In the following section, we apply the proposed method to simulated data.
+
+## Data generation 
+
+We demonstrate the proposed weighted AFT-GEE method to a scenario without a cure fraction.
+We consider a logistic model to generate the cure status of individuals:
+$$\mbox{logit}(p_{ik}) = \gamma_1X_{ik1} + \gamma_2X_{ik2} + \gamma_3X_{ik3} + \gamma_3X_{ik4},$$
+where $\gamma_1 = 1, \gamma_2 = 0.6, \gamma_3 = 0.5$, and $\gamma_4 = -0.1$.
+When a subject was identified as cured, we set their corresponding survival time to infinity prior to applying censoring. 
+For these who are not cured, we generate the survival time from an accelerated failure time (AFT) model:
+$$\log{T_{ik}} = \beta_1 X_{ik1}+ \beta_2 X_{ik2} + \beta_3 X_{ik3} + \beta_4 X_{ik4} + \alpha_i + \epsilon_{ik},$$
+where $X_{ik1}$ follows a uniform distribution over $(0, 2)$, 
+$X_{ik2}$ follows a binomial distribution with rate $0.5$, 
+$X_{ik3}$ follows a normal distribution with mean 1 and variance 0.3,
+$X_{ik4}$ follows a normal distribution with mean 1 and variance 1, 
+$\alpha_i$ follows a normal distribution with mean 0 and variance 0.05, 
+and $\epsilon_{ik}$ is the error term.
+The true parameters are $\beta_1 = 0.3, \beta_2 = 0.4, \beta_3 = -0.2$, and $\beta_4 = -0.3$.
+The cluster size is set at $K_i = 1 + k_i^\ast$, 
+where $k^\ast_i$ follows a Poisson distribution with mean $\exp(1 + 2\alpha_i)$. 
+The frailty variable, $\alpha_i$, is shared between the AFT model and the cluster size, 
+making cluster size informative about the event time.
+To introduce within-cluster dependence, we generate
+$\epsilon_{i} = \{\epsilon_{i1}, \ldots, \epsilon_{iK_i}\}^\top$ 
+from a zero-mean multivariate normal distribution with an exchangeable covariance matrix of
+$0.5\left[I_{K_i}(1 - \rho) + J_{K_i}\rho\right]$, where $I_{K_i}$ is a ${K_i}$-dimensional identity matrix 
+and $J_{K_i}$ is a ${K_i}$ by ${K_i}$ matrix of 1s.
+We considered three levels of $\rho$, namely 0, 0.3, and 0.6, 
+representing independence, moderate within-cluster dependence, and high within-cluster dependence, respectively. 
+We generate independent censoring times at the cluster level 
+from an exponential distribution with rate $\lambda$, 
+where $\lambda$ is chosen to achieve 25\% and 50\% censoring rate. 
+We adjusted the censoring parameter $\lambda$ to attain combined censoring and cure rates of 25\% and 50\%.
+As in the previous scenario, we applied the IND, EX, and AR1 models to each scenario. 
+
+
+The data can be generated using the `dat_with_cure()` function found in `codes.R` within the `code` folder. 
+You can load the `codes.R` file and view the arguments of `dat_with_cure()` using the following code:
+```{R}
+source("../code/codes.R")
+args(dat_with_cure)
+```
+
+The arguments are in `dat_with_cure()` are as follow: 
+
+  * `n`: Specifies the number of clusters for the simulation.
+  * `rho`: Defines the correlation among observations.
+  * `c`: Sets the censoring parameter to control the proportion of censored observations.
+  * `datadep`: Determines the correlation structure used in the data.
+  * `para1`: Represents the regression coefficients in the incidence component of the model.
+  * `para2`: Represents the regression coefficients in the latency component of the model.
+  
+The `dat_with_cure()` function generates a data frame containing 8 variables. Below is an example using the default parameters from `dat_with_cure()`.
+
+```{R}
+set.seed(1); head(dat <- dat_with_cure())
+```
+
+The variables are described as follows:
+
+  * `id`: Identifies the cluster ID.
+  * `yij`: Represents the observed survival time.
+  * `delta`: Acts as the censoring indicator, with 1 indicating an observed event and 0 indicating the data is censored or cured.
+  * `x1` to `x4`: Serve as covariates.
+  * `weight`: Provides the inverse of the cluster size, used as a sampling weight.  
+  
+## Fitting the mixture cure model
+
+The proposed method can be implemented using the `cure_em()` function. 
+For example, the code below fits the mixture cure model with an exchangeable correlation structure, utilizing the EM accelerator `squarem`.
+```{R, cache = TRUE}
+system.time(fit <- cure_em(xformula = Surv(yij, delta) ~ x1 + x2 + x3 + x4,
+                           zformula = ~ x1 + x2 + x3 + x4,
+                           data = dat, id = id, weight = weight,
+                           corstr = "ex", em = "squarem"))
+str(fit)
+```
+The `cure_em()` function returns a list composed of seven elements, described as follows:
+
+  * `coef_cure`: Provides an estimate of the regression coefficients for the incidence component.
+  * `coef_aft`: Provides an estimate of the regression coefficients for the latency component.
+  * `surv_prob`: Estimates the survival probability for the non-cured subjects at the observed survival times.
+  * `convergence`: Indicates whether the EM algorithm successfully converged, with TRUE signifying successful convergence and FALSE otherwise.
+  * `iter`: Represents the number of iterations required to achieve convergence.
+  * `fpevals`: Counts the number of times the fixed-point function `fixptfn()` was evaluated. For more details, see `?fixptfn`.
+  * `call`: Records the function call.
+  
+The `cure_em()` function does not provide an estimate of variance. To obtain this, you can employ a bootstrap method, which can be implemented as shown below.
+```{R, cache = TRUE}
+set.seed(1)
+fitB <- replicate(200, {
+  n <- length(unique(dat$id))
+  clusters_sample <- sample(1:n, n, replace = TRUE)
+  dat_new <- do.call(rbind, split(dat, dat$id)[clusters_sample])
+  dat_new$id <- rep(1:n, tabulate(dat$id)[clusters_sample])
+  tmp <- update(fit, data = dat_new)
+  unlist(tmp[1:2])
+})
+```
+In our experience, we have observed that the EM algorithm may not converge for a small portion of the bootstrap samples (about 1 to 4% in our full-scale simulation study). 
+To address this, filter out the unconverged bootstrap estimates and calculate the empirical variance as the variance estimate. 
+The following table summarizes the fit in this simulated example.
+```{R, cache = TRUE}
+fitB <- fitB[,!apply(fitB, 2, function(x) any(abs(x) > 1e3))]
+tab <- rbind(fit$coef_cure, 
+             apply(fitB[1:5,], 1, sd),
+             fit$coef_aft,
+             apply(fitB[6:10,], 1, sd))
+kable(cbind(c("Indicence", "", "Latency", ""),
+            c("PE", "SE", "PE", "SE"),
+            round(tab, 3)),
+      align = c("l", "l", "r", "r", "r", "r", "r"))
+```
+
