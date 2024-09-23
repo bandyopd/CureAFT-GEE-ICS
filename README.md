@@ -38,6 +38,6 @@ include the version numbers.
 This repository is organized into two folders: `example` and `code`. The
 `example` folder contains sample codes for running the simulations, and
 can be accessed
-[here](https://htmlpreview.github.io/?https://github.com/bandyopd/CureAFT-GEE-ICS/example/run.html)
+[here](https://htmlpreview.github.io/?https://github.com/bandyopd/CureAFT-GEE-ICS/main/example/run.html)
 for easy reference. The code folder includes our implementations of the
 proposed method.
