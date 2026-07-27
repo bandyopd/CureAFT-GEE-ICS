@@ -1492,14 +1492,14 @@ MathJax.Hub.Config({
 data.</p>
 <div id="data-generation" class="section level2">
 <h2>Data generation</h2>
-<p>We demonstrate the proposed weighted AFT-GEE method to a scenario
-without a cure fraction. We consider a logistic model to generate the
+<p>We demonstrate the proposed weighted AFT-GEE method in a scenario
+with a cure fraction. We consider a logistic model to generate the
 cure status of individuals: <span class="math display">\[\mbox{logit}(p_{ik}) = \gamma_1X_{ik1} +
-\gamma_2X_{ik2} + \gamma_3X_{ik3} + \gamma_3X_{ik4},\]</span> where
+\gamma_2X_{ik2} + \gamma_3X_{ik3} + \gamma_4X_{ik4},\]</span> where
 <span class="math inline">\(\gamma_1 = 1, \gamma_2 = 0.6, \gamma_3 =
 0.5\)</span>, and <span class="math inline">\(\gamma_4 = -0.1\)</span>.
 When a subject was identified as cured, we set their corresponding
-survival time to infinity prior to applying censoring. For these who are
+survival time to infinity prior to applying censoring. For those who are
 not cured, we generate the survival time from an accelerated failure
 time (AFT) model: <span class="math display">\[\log{T_{ik}} = \beta_1
 X_{ik1}+ \beta_2 X_{ik2} + \beta_3 X_{ik3} + \beta_4 X_{ik4} + \alpha_i
@@ -1507,8 +1507,8 @@ X_{ik1}+ \beta_2 X_{ik2} + \beta_3 X_{ik3} + \beta_4 X_{ik4} + \alpha_i
 over <span class="math inline">\((0, 2)\)</span>, <span class="math inline">\(X_{ik2}\)</span> follows a binomial distribution
 with rate <span class="math inline">\(0.5\)</span>, <span class="math inline">\(X_{ik3}\)</span> follows a normal distribution
 with mean 1 and variance 0.3, <span class="math inline">\(X_{ik4}\)</span> follows a normal distribution
-with mean 1 and variance 1, <span class="math inline">\(\alpha_i\)</span> follows a normal distribution
-with mean 0 and variance 0.05, and <span class="math inline">\(\epsilon_{ik}\)</span> is the error term. The true
+with mean -1 and variance 1, <span class="math inline">\(\alpha_i\)</span> follows a normal distribution
+with mean 0 and variance 0.25, and <span class="math inline">\(\epsilon_{ik}\)</span> is the error term. The true
 parameters are <span class="math inline">\(\beta_1 = 0.3, \beta_2 = 0.4,
 \beta_3 = -0.2\)</span>, and <span class="math inline">\(\beta_4 =
 -0.3\)</span>. The cluster size is set at <span class="math inline">\(K_i = 1 + k_i^\ast\)</span>, where <span class="math inline">\(k^\ast_i\)</span> follows a Poisson distribution
@@ -1519,7 +1519,7 @@ informative about the event time. To introduce within-cluster
 dependence, we generate <span class="math inline">\(\epsilon_{i} =
 \{\epsilon_{i1}, \ldots, \epsilon_{iK_i}\}^\top\)</span> from a
 zero-mean multivariate normal distribution with an exchangeable
-covariance matrix of <span class="math inline">\(0.5\left[I_{K_i}(1 -
+covariance matrix of <span class="math inline">\(0.05\left[I_{K_i}(1 -
 \rho) + J_{K_i}\rho\right]\)</span>, where <span class="math inline">\(I_{K_i}\)</span> is a <span class="math inline">\({K_i}\)</span>-dimensional identity matrix and
 <span class="math inline">\(J_{K_i}\)</span> is a <span class="math inline">\({K_i}\)</span> by <span class="math inline">\({K_i}\)</span> matrix of 1s. We considered three
 levels of <span class="math inline">\(\rho\)</span>, namely 0, 0.3, and
@@ -1549,9 +1549,9 @@ proportion of censored observations.</li>
 <li><code>datadep</code>: Determines the correlation structure used in
 the data.</li>
 <li><code>para1</code>: Represents the regression coefficients in the
-incidence component of the model.</li>
-<li><code>para2</code>: Represents the regression coefficients in the
 latency component of the model.</li>
+<li><code>para2</code>: Represents the regression coefficients in the
+incidence component of the model.</li>
 </ul>
 <p>The <code>dat_with_cure()</code> function generates a data frame
 containing 8 variables. Below is an example using the default parameters
@@ -1642,7 +1642,7 @@ simulated example.</p>
 +              apply(fitB[1:5,], 1, sd),
 +              fit$coef_aft,
 +              apply(fitB[6:10,], 1, sd))
-&gt; kable(cbind(c(&quot;Indicence&quot;, &quot;&quot;, &quot;Latency&quot;, &quot;&quot;),
+&gt; kable(cbind(c(&quot;Incidence&quot;, &quot;&quot;, &quot;Latency&quot;, &quot;&quot;),
 +             c(&quot;PE&quot;, &quot;SE&quot;, &quot;PE&quot;, &quot;SE&quot;),
 +             round(tab, 3)),
 +       align = c(&quot;l&quot;, &quot;l&quot;, &quot;r&quot;, &quot;r&quot;, &quot;r&quot;, &quot;r&quot;, &quot;r&quot;))</code></pre>
@@ -1660,7 +1660,7 @@ simulated example.</p>
 </thead>
 <tbody>
 <tr class="odd">
-<td align="left">Indicence</td>
+<td align="left">Incidence</td>
 <td align="left">PE</td>
 <td align="right">-0.435</td>
 <td align="right">1.537</td>
