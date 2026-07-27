@@ -1,5 +1,5 @@
 ## Load library
-pkgs <- c("aftgee", "survival", "geepack", "SQUAREM", "daarem")
+pkgs <- c("MASS", "aftgee", "survival", "geepack", "SQUAREM", "daarem")
 invisible(sapply(pkgs, require, character.only = TRUE))
 
 #' Function to generate data with a cure fraction
@@ -17,25 +17,25 @@ dat_with_cure <- function(n = 200, rho = 0, c = 0.005,
                           para2 = c(1, 0.6, 0.5, -0.1)) {
   dat <- NULL
   for (i in 1:n) {
-    alpha <- rnorm(1, mean = 0, sd = sqrt(0.05))
+    alpha <- rnorm(1, mean = 0, sd = sqrt(0.25))
     cluster_size <- rpois(1, exp(1 + 2 * alpha)) + 1
     x1 <- runif(cluster_size, min = 0, max = 2)
     x2 <- rbinom(cluster_size, 1, 0.5)
     x3 <- rnorm(cluster_size, mean = 1, sd = sqrt(0.3))
     x4 <- rnorm(cluster_size, mean = -1, sd = 1)
     if (datadep == "ind") {
-      e <- rnorm(cluster_size, mean = 0, sd = sqrt(0.5))
+      e <- rnorm(cluster_size, mean = 0, sd = sqrt(0.05))
     }
     if (datadep == "ex") {
       e <- mvrnorm(1,
                    mu = rep(0, cluster_size),
-                   Sigma = 0.5 * (diag(1 - rho, cluster_size) +
+                   Sigma = 0.05 * (diag(1 - rho, cluster_size) +
                                   matrix(rho, cluster_size, cluster_size)))
     }
     if (datadep == "ar1") {
       e <- mvrnorm(1,
                    mu = rep(0, cluster_size),
-                   Sigma = 0.5 * (outer(
+                   Sigma = 0.05 * (outer(
                      1:cluster_size, 1:cluster_size,
                      function(x, y) rho^abs(x - y)
                    )))
