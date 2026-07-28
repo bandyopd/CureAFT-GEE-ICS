@@ -23,18 +23,18 @@ In the following section, we apply the proposed method to simulated data.
 
 ## Data generation 
 
-We demonstrate the proposed weighted AFT-GEE method to a scenario without a cure fraction.
+We demonstrate the proposed weighted AFT-GEE method in a scenario with a cure fraction.
 We consider a logistic model to generate the cure status of individuals:
-$$\mbox{logit}(p_{ik}) = \gamma_1X_{ik1} + \gamma_2X_{ik2} + \gamma_3X_{ik3} + \gamma_3X_{ik4},$$
+$$\mbox{logit}(p_{ik}) = \gamma_1X_{ik1} + \gamma_2X_{ik2} + \gamma_3X_{ik3} + \gamma_4X_{ik4},$$
 where $\gamma_1 = 1, \gamma_2 = 0.6, \gamma_3 = 0.5$, and $\gamma_4 = -0.1$.
 When a subject was identified as cured, we set their corresponding survival time to infinity prior to applying censoring. 
-For these who are not cured, we generate the survival time from an accelerated failure time (AFT) model:
+For those who are not cured, we generate the survival time from an accelerated failure time (AFT) model:
 $$\log{T_{ik}} = \beta_1 X_{ik1}+ \beta_2 X_{ik2} + \beta_3 X_{ik3} + \beta_4 X_{ik4} + \alpha_i + \epsilon_{ik},$$
 where $X_{ik1}$ follows a uniform distribution over $(0, 2)$, 
 $X_{ik2}$ follows a binomial distribution with rate $0.5$, 
 $X_{ik3}$ follows a normal distribution with mean 1 and variance 0.3,
-$X_{ik4}$ follows a normal distribution with mean 1 and variance 1, 
-$\alpha_i$ follows a normal distribution with mean 0 and variance 0.05, 
+$X_{ik4}$ follows a normal distribution with mean -1 and variance 1, 
+$\alpha_i$ follows a normal distribution with mean 0 and variance 0.25, 
 and $\epsilon_{ik}$ is the error term.
 The true parameters are $\beta_1 = 0.3, \beta_2 = 0.4, \beta_3 = -0.2$, and $\beta_4 = -0.3$.
 The cluster size is set at $K_i = 1 + k_i^\ast$, 
@@ -44,7 +44,7 @@ making cluster size informative about the event time.
 To introduce within-cluster dependence, we generate
 $\epsilon_{i} = \{\epsilon_{i1}, \ldots, \epsilon_{iK_i}\}^\top$ 
 from a zero-mean multivariate normal distribution with an exchangeable covariance matrix of
-$0.5\left[I_{K_i}(1 - \rho) + J_{K_i}\rho\right]$, where $I_{K_i}$ is a ${K_i}$-dimensional identity matrix 
+$0.05\left[I_{K_i}(1 - \rho) + J_{K_i}\rho\right]$, where $I_{K_i}$ is a ${K_i}$-dimensional identity matrix 
 and $J_{K_i}$ is a ${K_i}$ by ${K_i}$ matrix of 1s.
 We considered three levels of $\rho$, namely 0, 0.3, and 0.6, 
 representing independence, moderate within-cluster dependence, and high within-cluster dependence, respectively. 
@@ -68,8 +68,8 @@ The arguments are in `dat_with_cure()` are as follow:
   * `rho`: Defines the correlation among observations.
   * `c`: Sets the censoring parameter to control the proportion of censored observations.
   * `datadep`: Determines the correlation structure used in the data.
-  * `para1`: Represents the regression coefficients in the incidence component of the model.
-  * `para2`: Represents the regression coefficients in the latency component of the model.
+  * `para1`: Represents the regression coefficients in the latency component of the model.
+  * `para2`: Represents the regression coefficients in the incidence component of the model.
   
 The `dat_with_cure()` function generates a data frame containing 8 variables. Below is an example using the default parameters from `dat_with_cure()`.
 
@@ -127,7 +127,7 @@ tab <- rbind(fit$coef_cure,
              apply(fitB[1:5,], 1, sd),
              fit$coef_aft,
              apply(fitB[6:10,], 1, sd))
-kable(cbind(c("Indicence", "", "Latency", ""),
+kable(cbind(c("Incidence", "", "Latency", ""),
             c("PE", "SE", "PE", "SE"),
             round(tab, 3)),
       align = c("l", "l", "r", "r", "r", "r", "r"))
