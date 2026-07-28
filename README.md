@@ -10,9 +10,9 @@ Bandyopadhyay, Sy Han Chiou, and Sangwook Kang.
 The proposed methods can be conveniently implemented using existing
 packages such as `MASS`, `survival`, `aftgee`, `geepack`, `SQUAREM`, and
 `daarem`. The `MASS` and `survival` packages are typically included with
-standard R installations. The remaining packages can be installed using `install.packages()`.
-Once installed, these packages can be loaded using the following code snippets,
-which include the version numbers.
+standard R installations. The remaining packages can be installed using
+`install.packages()`. Once installed, these packages can be loaded using
+the following code snippets, which include the version numbers.
 
 ``` r
 > pkgs <- c("MASS", "aftgee", "survival", "geepack", "SQUAREM", "daarem")
@@ -20,18 +20,21 @@ which include the version numbers.
 > sapply(pkgs, packageVersion, simplify = FALSE)
 ```
 
+    $MASS
+    [1] '7.3.65'
+    
     $aftgee
-    [1] '1.2.0'
-
+    [1] '1.2.1'
+    
     $survival
-    [1] '3.7.0'
-
+    [1] '3.8.6'
+    
     $geepack
-    [1] '1.3.10'
-
+    [1] '1.3.13'
+    
     $SQUAREM
-    [1] '2021.1'
-
+    [1] '2026.1'
+    
     $daarem
     [1] '0.7'
 
