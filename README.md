@@ -8,14 +8,14 @@ informative cluster size” by Weixi Zhu, Jonathan W. Yu, Dipankar
 Bandyopadhyay, Sy Han Chiou, and Sangwook Kang.
 
 The proposed methods can be conveniently implemented using existing
-packages such as `survival`, `aftgee`, `geepack`, `SQUAREM`, and
-`daarem`. Except for `survival`, which is a built-in package, the other
-packages can be installed using `install.packages()`. Once installed,
-these packages can be loaded using the following code snippets, which
-include the version numbers.
+packages such as `MASS`, `survival`, `aftgee`, `geepack`, `SQUAREM`, and
+`daarem`. The `MASS` and `survival` packages are typically included with
+standard R installations. The remaining packages can be installed using `install.packages()`.
+Once installed, these packages can be loaded using the following code snippets,
+which include the version numbers.
 
 ``` r
-> pkgs <- c("aftgee", "survival", "geepack", "SQUAREM", "daarem")
+> pkgs <- c("MASS", "aftgee", "survival", "geepack", "SQUAREM", "daarem")
 > invisible(sapply(pkgs, require, character.only = TRUE))
 > sapply(pkgs, packageVersion, simplify = FALSE)
 ```
