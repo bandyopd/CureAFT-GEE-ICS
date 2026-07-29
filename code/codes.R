@@ -7,12 +7,12 @@ invisible(sapply(pkgs, require, character.only = TRUE))
 #' @param n sample size
 #' @param rho correlation
 #' @param c censoring parameter
-#' @param datadep correlation structure
-#' @param para1 regression coefficients in the incidence component
-#' @param para2 regression coefficients in the latency component
+#' @param datadep residual correlation structure used to generate the data
+#' @param para1 regression coefficients in the latency component
+#' @param para2 regression coefficients in the incidence component
 #' 
 dat_with_cure <- function(n = 200, rho = 0, c = 0.005,
-                          datadep = "ind",
+                          datadep = "ex",
                           para1 = c(0.3, 0.4, -0.2, -0.3),
                           para2 = c(1, 0.6, 0.5, -0.1)) {
   dat <- NULL
@@ -82,17 +82,17 @@ aftsurv <- function(y, x, b, weight1, weight2) {
   return(km2$surv[match(err, km2$time)])
 }
 
-#' Function to carry out one iteration of the EM algorithm 
+#' Function to carry out one iteration of the EM-type algorithm 
 #'
 #' @param para is a vector of all parameter of interest;
 #' this includes the regression coefficient in both components and
-#' the survival estiamtes for the non-cure proportion.
+#' the estimated latency survival probabilities evaluated at the observed times.
 #' @param x is the covariate matrix for the latency component
 #' @param z is the covariate matrix for the incident component
 #' @param y is the observed survival time created by Surv()
 #' @param id is the cluster id
 #' @param weight is the sampling weight for informative cluster size
-#' @param corstr is the correlation structure
+#' @param corstr is the working correlation structure used in model fitting
 #' @param formula specifies the formula for the AFT model in the latency component
 #' @param data optional data frame 
 one <- function(para, x, z, y, id, weight, corstr, formula, data) {
@@ -118,15 +118,15 @@ one <- function(para, x, z, y, id, weight, corstr, formula, data) {
   ))
 }
 
-#' Function to run the whole EM algorithm 
+#' Function to run the whole EM-type algorithm 
 #'
 #' @param xformula model formula for the latency component
 #' @param zformula model formula for the incident component
 #' @param data optional data frame 
 #' @param id is the cluster id
 #' @param weight is the sampling weight for informative cluster size
-#' @param corstr is the correlation structure
-#' @param em which EM accelerator to use? squarem or daarem?
+#' @param corstr is the working correlation structure used in model fitting
+#' @param em which fixed-point accelerator to use
 cure_em <- function(xformula, zformula, data, id, weight,
                     corstr = c("ind", "ex", "ar1"),
                     em = c("squarem", "daarem")) {
